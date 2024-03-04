@@ -1,6 +1,6 @@
 void beginTheSerialMonitor() { Serial.begin(115200);}
 
-#if 0
+#if 1
 
 //Add software serial library so that you can add custom UART, tx, rx
 #include <SoftwareSerial.h>
@@ -22,7 +22,34 @@ const int
   front_leftMotorForward = 8,
   front_leftMotorBackward = 7;
 
+
+const int trigPin = A3;
+const int echoPin = A1;
+
+int calculateDistance() {//calculate distance in centimeter
+  int calculatedDistance;
+  long echoReturnTime;
+  
+  //signal the triger pin to make it send an ultrasonic sound waves
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  //store the time taken for echo to return in a variable
+  echoReturnTime = pulseIn(echoPin, HIGH);
+  calculatedDistance = echoReturnTime / 58.2;//calculate distance using speed of sound which is 343m/s approxe
+  delay(1000);  // Adjust delay as needed
+
+  return calculatedDistance;
+}
+
 void setPinMode() {
+  // for the ultrasonic sensor
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
   //tell arduino that these pins are OUTPUT
   //for backward motors
   pinMode(back_rightMotorForward, OUTPUT);
@@ -181,16 +208,31 @@ void IOTDrive(char command) {
 }
 
 void obstacleAvoidanceMode() {
-  // drive automatically
+    int distance = calculateDistance();
+
+    
+    if (distance < 10) {
+        // Obstacle detected, perform avoidance maneuver
+        stopMoving();  // Stop the car
+        
+        servoRotateRight();
+        int rightSideDistance = calculateDistance();
+        servoRotateLeft();
+        int leftSideDistance = calculateDistance;
+
+        if (leftSideDistance > rightSideDistance) {
+            goLeft();  
+        } else {
+            goRight();  
+        }
+    } else {
+        // No obstacle, continue normal operation
+        goForward();
+    }
 }
 
-const char
-    autoDrive = 'd';
-
-
-int moveDelay = 2000;
-void loop() {
-  
+void testAllMovements() {
+  int moveDelay = 2000;
   goForward();
   delay(moveDelay);
   goBackward();
@@ -199,6 +241,15 @@ void loop() {
   delay(moveDelay);
   goRight();
   delay(moveDelay);
+}
+
+const char
+    autoDrive = 'd';
+
+
+int moveDelay = 2000;
+void loop() {
+  obstacleAvoidanceMode();
 
 // /*
   if (btModule.available() > 0) {

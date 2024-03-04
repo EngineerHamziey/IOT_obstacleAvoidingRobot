@@ -1,7 +1,7 @@
 #if 0
 
-const int trigPin = 12;
-const int echoPin = 11;
+const int trigPin = A3;
+const int echoPin = A1;
 
 int calculateDistance() {//calculate distance in centimeter
   int calculatedDistance;
