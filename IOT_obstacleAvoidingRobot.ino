@@ -64,17 +64,6 @@ void setPinMode() {
   pinMode(front_leftMotorBackward, OUTPUT);
 }
 
-
-const char 
-    forward = 'f',
-    reverse = 'a',
-    right = 'r',
-    left = 'l',
-    servoRight = 's',
-    servoLeft = 't',
-    servoFront = 'u';
-
-
 void goForward() {  //motor right and left
   //right wheel, go forward
   digitalWrite(front_rightMotorForward, HIGH);  //GIVE THIS PIN +5V
@@ -172,13 +161,18 @@ void servoRotateLeft() {
 void servoRotateFront() {
   // code to rotate the servo to the front
 }
-
-void setup() {
-  setPinMode();
-}
     
 
 void IOTDrive(char command) {
+
+  const char 
+    forward = 'f',
+    reverse = 'b',
+    right = 'r',
+    left = 'l',
+    servoRight = 'n',
+    servoLeft = 't',
+    servoFront = 'c';
   switch (command) {
     case forward:
       goForward();
@@ -210,7 +204,6 @@ void IOTDrive(char command) {
 void obstacleAvoidanceMode() {
     int distance = calculateDistance();
 
-    
     if (distance < 10) {
         // Obstacle detected, perform avoidance maneuver
         stopMoving();  // Stop the car
@@ -243,17 +236,23 @@ void testAllMovements() {
   delay(moveDelay);
 }
 
+
+void setup() {
+  btModule.begin(9600);
+  beginTheSerialMonitor();
+  setPinMode();
+  stopMoving();
+}
+
 const char
     autoDrive = 'd';
 
 
 int moveDelay = 2000;
 void loop() {
-  obstacleAvoidanceMode();
-
-// /*
   if (btModule.available() > 0) {
-    char receivedInstruction = Serial.read(); // read the incoming command
+    char receivedInstruction = btModule.read(); // read the incoming command
+    Serial.println("received char = " + String(receivedInstruction));
     switch(receivedInstruction) {
       case autoDrive:
         obstacleAvoidanceMode();
